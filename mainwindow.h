@@ -18,6 +18,9 @@ public:
 private slots:
     void on_btnagregar_clicked();
 
+    void on_btncargar_clicked();
+    void cargar_archivo(QString contenido);
+
 private:
     Ui::MainWindow *ui;
 };
