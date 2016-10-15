@@ -21,6 +21,12 @@ private slots:
     void on_btncargar_clicked();
     void cargar_archivo(QString contenido);
 
+    void on_btnbuscar_clicked();
+
+    void on_btneliminar_clicked();
+
+    void on_btnmodificar_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

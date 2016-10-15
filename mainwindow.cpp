@@ -1,13 +1,18 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "QString"
-#include "string.h"
+#include "string"
 #include "QFile"
 #include "QTextStream"
 #include "QMessageBox"
 #include "QFileDialog"
+#include "avl.h"
+#include "iostream"
 
 using namespace std;
+
+avl::pnodo carro;
+avl arbol_carros;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->cboxtransmision->addItem("Automatica");
     ui->cboxtransmision->addItem("Mecanica");
+
 }
 
 MainWindow::~MainWindow()
@@ -37,6 +43,26 @@ void MainWindow::on_btnagregar_clicked()
         QMessageBox::information(this,"Error","Debes llenar todas las casillas.");
     }else{
         //insertar en el arbol
+        char* pla = new char[placa.size()+1];
+        char* mar = new char[marca.size()+1];
+        char* mod = new char[modelo.size()+1];
+        char* an = new char[ano.size()+1];
+        char* col = new char[color.size()+1];
+        char* tra = new char[transmision.size()+1];
+        strcpy(pla, placa.toLatin1().data());
+        strcpy(mar, marca.toLatin1().data());
+        strcpy(mod, modelo.toLatin1().data());
+        strcpy(an, ano.toLatin1().data());
+        strcpy(col, color.toLatin1().data());
+        strcpy(tra, transmision.toLatin1().data());
+        int pre = precio.toInt();
+        carro = arbol_carros.InsertarAVL(pla,mar,mod,an,col,pre,tra,carro);
+        ui->txtplaca->setText("");
+        ui->txtmarca->setText("");
+        ui->txtmodelo->setText("");
+        ui->txtano->setText("");
+        ui->txtcolor->setText("");
+        ui->txtprecio->setText("");
     }
 }
 
@@ -49,49 +75,160 @@ void MainWindow::on_btncargar_clicked()
     }else{
         QTextStream contenido(&archivo);
         QString texto = contenido.readAll();
+        //cout<<texto.toStdString()<<endl;
         cargar_archivo(texto);
         archivo.close();
     }
 }
 
 void MainWindow::cargar_archivo(QString contenido){
+    char* pla;
+    char* mar;
+    char* mod;
+    char* an;
+    char* col;
+    int pre, caso=0;
+    char* tra;
     QStringList lineas = contenido.split("\n"); //se separan las lineas por el salto de linea.
-    for(int i=0;i<lineas.length()-1;i++){
-        QString linea_actual = lineas.value(i);
-        if(!linea_actual.isNull() || !linea_actual.isEmpty()){ //si no esta vacia o nula
-            int caso=1;
-            QString dato="";
-            for(int j=0;j<linea_actual.length()-1;j++){
-                QString caracter = linea_actual.at(j);
-                if(caracter!=";"){
-                    if(caracter!=":"){
-                        dato+=caracter;
-                    }else{
-                        if(caso==1){
-                            //placa
-                            caso++;
-                        }else if(caso==2){
-                            //marca
-                            caso++;
-                        }else if(caso==3){
-                            //modelo
-                            caso++;
-                        }else if(caso==4){
-                            //ano
-                            caso++;
-                        }else if(caso==5){
-                            //color
-                            caso++;
-                        }else if(caso==6){
-                            //precio
-                            caso++;
-                        }else if(caso==7){
-                            //transmision
-                            caso-=6;
-                        }
-                    }
-                }
+    for(int h=0; h<lineas.length(); h++){
+        QString tmp = lineas.value(h);
+        //cout<<h<<endl;
+        //cout<<tmp.toStdString()<<endl;
+        QStringList algo = tmp.split(":");
+        //QString tmp3 = algo.value(2);
+        //cout<<tmp3.toStdString()<<endl;
+        for(int w=0; w<algo.length(); w++){
+            //cout<<w<<endl;
+            QString tmp2 = algo.value(w);
+            switch(caso){
+            case 0:
+                pla = new char[tmp2.size()+1];
+                strcpy(pla, tmp2.toLatin1().data());
+                caso=1;
+                break;
+            case 1:
+                mar = new char[tmp2.size()+1];
+                strcpy(mar, tmp2.toLatin1().data());
+                caso=2;
+                break;
+            case 2:
+                mod = new char[tmp2.size()+1];
+                strcpy(mod, tmp2.toLatin1().data());
+                caso=3;
+                break;
+            case 3:
+                an = new char[tmp2.size()+1];
+                strcpy(an, tmp2.toLatin1().data());
+                caso=4;
+                break;
+            case 4:
+                col = new char[tmp2.size()+1];
+                strcpy(col, tmp2.toLatin1().data());
+                caso=5;
+                break;
+            case 5:
+                pre = tmp2.toInt();
+                caso=6;
+                break;
+            case 6:
+                tra = new char[tmp2.size()+1];
+                strcpy(tra, tmp2.toLatin1().data());
+                caso=0;
+                cout<<"insertar"<<endl;
+                carro = arbol_carros.InsertarAVL(pla, mar, mod, an, col, pre, tra, carro);
+                break;
             }
         }
+    }
+    /*
+
+    QString linea="";
+    for(int i=0;i<lineas.length();i++){
+
+        linea = lineas.value(i);
+        if(linea.isNull() || linea.isEmpty()){
+           cout<<"linea vacia"<<endl;
+        }else{
+            QStringList datos = linea.split(":");
+
+            QString dato="";
+            for(int j; j<datos.length(); j++){
+                dato = datos.value(j);
+                cout<<j<<endl;
+                cout<<dato.toStdString()<<endl;
+            }
+        }
+    }
+    **/
+
+}
+
+void MainWindow::on_btnbuscar_clicked()
+{
+    QString placa = ui->txtplaca->text();
+    if(placa.isNull()||placa.isEmpty()){
+        QMessageBox::information(this,"Error","Para buscar debes ingresar una placa.");
+    }else{
+        avl::pnodo ubicado;
+        char* pla = new char[placa.size()+1];
+        strcpy(pla, placa.toLatin1().data());
+
+        ubicado = arbol_carros.Buscar(pla, carro);
+
+        if(ubicado==NULL){
+            QMessageBox::information(this,"Error","Dato no encontrado.");
+        }else{
+            /*char* a qstring*/
+            QString texto_nodo;
+            char* dato_nodo = (char*)malloc(50);
+            strcpy(dato_nodo, ubicado->marca);
+            texto_nodo = QString::fromStdString(dato_nodo);
+            ui->txtmarca->setPlaceholderText(texto_nodo);
+
+            strcpy(dato_nodo, ubicado->modelo);
+            texto_nodo = QString::fromStdString(dato_nodo);
+            ui->txtmodelo->setPlaceholderText(texto_nodo);
+
+            strcpy(dato_nodo, ubicado->ano);
+            texto_nodo = QString::fromStdString(dato_nodo);
+            ui->txtano->setPlaceholderText(texto_nodo);
+
+            strcpy(dato_nodo, ubicado->color);
+            texto_nodo = QString::fromStdString(dato_nodo);
+            ui->txtcolor->setPlaceholderText(texto_nodo);
+
+            texto_nodo = QString::number(ubicado->precio);
+            ui->txtprecio->setPlaceholderText(texto_nodo);
+
+        }
+
+    }
+}
+
+void MainWindow::on_btneliminar_clicked()
+{
+    QString placa = ui->txtplaca->text();
+    if(placa.isNull()||placa.isEmpty()){
+        QMessageBox::information(this,"Error","Para eliminar debes ingresar una placa.");
+    }else{
+        avl::pnodo ubicado;
+        char* pla = new char[placa.size()+1];
+        strcpy(pla, placa.toLatin1().data());
+        ubicado = arbol_carros.DescartarAVL(pla, carro);
+
+    }
+}
+
+void MainWindow::on_btnmodificar_clicked()
+{
+    QString placa = ui->txtplaca->text();
+    if(placa.isNull()||placa.isEmpty()){
+        QMessageBox::information(this,"Error","Para modificar debes ingresar una placa.");
+    }else{
+        avl::pnodo ubicado;
+        char* pla = new char[placa.size()+1];
+        strcpy(pla, placa.toLatin1().data());
+        ubicado = arbol_carros.Buscar(pla, carro);
+
     }
 }
