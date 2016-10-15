@@ -154,14 +154,14 @@ void MainWindow::on_btnbuscar_clicked()
         strcpy(pla, placa.toLatin1().data());
 
         ubicado = arbol_carros.Buscar(pla, carro);
-
+        /*
         cout<<"buscar"<<endl;
         char* dato_nodo = (char*)malloc(10);
         strcpy(dato_nodo, ubicado->modelo);
         QString texto_n = QString::fromStdString(dato_nodo);
         cout<<"contenido del nodo"<<endl;
         cout<<texto_n.toStdString()<<endl;
-
+        **/
         if(ubicado==NULL){
             QMessageBox::information(this,"Error","Dato no encontrado.");
         }else{
@@ -202,7 +202,6 @@ void MainWindow::on_btneliminar_clicked()
         char* pla = new char[placa.size()+1];
         strcpy(pla, placa.toLatin1().data());
         ubicado = arbol_carros.DescartarAVL(pla, carro);
-
     }
 }
 
@@ -216,6 +215,59 @@ void MainWindow::on_btnmodificar_clicked()
         char* pla = new char[placa.size()+1];
         strcpy(pla, placa.toLatin1().data());
         ubicado = arbol_carros.Buscar(pla, carro);
+        if(ubicado==NULL){
+            QMessageBox::information(this,"Error","Placa no encontrada.");
+        }else{
+            QString marca, modelo, ano, color, precio, transmision;
+            int precio1=0;
+            marca=ui->txtmarca->text();
+            modelo=ui->txtmodelo->text();
+            ano=ui->txtano->text();
+            color=ui->txtcolor->text();
+            precio=ui->txtprecio->text();
+            transmision=ui->cboxtransmision->currentText();
+            char* mar;
+            char* mod;
+            char* an;
+            char* col;
+            char* tra;
+            if(marca.isNull()){
+                mar = new char[0];
+                strcpy(mar, NULL);
+            }else{
+                mar = new char[marca.size()+1];
+                strcpy(mar, marca.toLatin1().data());
+            }
+            if(modelo.isNull()){
+                mod = new char[0];
+                strcpy(mod, NULL);
+            }else{
+                mod = new char[modelo.size()+1];
+                strcpy(mod, modelo.toLatin1().data());
+            }
+            if(ano.isNull()){
+                an = new char[0];
+                strcpy(an, NULL);
+            }else{
+                an = new char[ano.size()+1];
+                strcpy(an, ano.toLatin1().data());
+            }
+            if(color.isNull()){
+                col = new char[0];
+                strcpy(col, NULL);
+            }else{
+                col = new char[color.size()+1];
+                strcpy(col, color.toLatin1().data());
+            }
+            if(precio.isNull()){
+                precio1=0;
+            }else{
+                precio1 = precio.toInt();
+            }
+            tra = new char[transmision.size()+1];
+            strcpy(tra, transmision.toLatin1().data());
 
+            carro = arbol_carros.Modificar(pla, mar, mod, an, col, precio1, tra, carro);
+        }
     }
 }

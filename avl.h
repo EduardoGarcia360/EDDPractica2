@@ -29,8 +29,12 @@ public:
     pnodo CreaNodo(char* placa);
     pnodo insertR(pnodo t);
     pnodo InsertarAVL(char* placa, char* marca, char* modelo, char* ano, char* color, int precio, char* transmision, pnodo t);
+    pnodo espejoR(pnodo t);
+    pnodo EspejoAVL(char* placa, char* marca, char* modelo, char* ano, char* color, int precio, char* transmision, pnodo t);
     pnodo Buscar(char* placa, pnodo t);
     pnodo _buscar(char* placa, pnodo t);
+    pnodo Modificar(char* placa, char* marca, char* modelo, char* ano, char* color, int precio, char* transmision, pnodo t);
+    pnodo _modificar(char* placa, char* marca, char* modelo, char* ano, char* color, int precio, char* transmision, pnodo t);
     pnodo deleteR(pnodo t);
     pnodo DescartarAVL(char* placa, pnodo raiz);
     pnodo deltreeR(pnodo t);

@@ -111,14 +111,14 @@ pnodo avl::insertR(pnodo t)
         flag = 1; /* Marca necesidad de revisar balances */
         return t; /* retorna puntero al insertado */
     }
-    else if (t->placa < placa1)
+    else if(strcmp(t->placa, placa1)<0)
     {
         //desciende por la derecha
         t->right = insertR(t->right);
         //se pasa por la siguiente línea en la revisión ascendente
         t->bal += flag; /* Incrementa factor de balance */
     }
-    else if (t->placa > placa1)
+    else if(strcmp(t->placa, placa1)>0)
     {
         //desciende por la izquierda
         t->left = insertR(t->left);
@@ -161,6 +161,81 @@ pnodo avl::insertR(pnodo t)
     return t;
 }
 
+pnodo avl::espejoR(pnodo t){
+    if (t == NULL)  /* Llegó a un punto de inserción */
+    {
+        t = CreaNodo(placa1);
+        t->bal = 0; /* Los dos hijos son nulos */
+        flag = 1; /* Marca necesidad de revisar balances */
+        return t; /* retorna puntero al insertado */
+    }
+    else if(strcmp(t->placa, placa1)>0)
+    {
+        //desciende por la derecha
+        t->right = insertR(t->right);
+        //se pasa por la siguiente línea en la revisión ascendente
+        t->bal += flag; /* Incrementa factor de balance */
+    }
+    else if(strcmp(t->placa, placa1)<0)
+    {
+        //desciende por la izquierda
+        t->left = insertR(t->left);
+        //se corrige en el ascenso
+        t->bal -= flag; /* Decrementa balance */
+    }
+    else   /* (t->k == key) Ya estaba en el árbol */
+    {
+        Error(1);
+        flag = 0;
+    }
+
+    if (flag == 0) /* No hay que rebalancear. Sigue el ascenso */
+        return t;
+
+    /*El código a continuación es el costo adicional para mantener propiedad AVL */
+    /* Mantiene árbol balanceado avl. Sólo una o dos rotaciones por inserción */
+    if (t->bal < -1)
+    {
+        /* Quedó desbalanceado por la izquierda. Espejos Casos c y d.*/
+        if (t->left->bal > 0)
+        /* Si hijo izquierdo está cargado a la derecha */
+            t->left = lrot(t->left);
+        t = rrot(t);
+        flag = 0; /* El subárbol no aumenta su altura */
+    }
+    else if (t->bal > 1)
+    {
+        /* Si quedó desbalanceado por la derecha: Casos c y d.*/
+        if (t->right->bal < 0)
+        /* Si hijo derecho está cargado a la izquierda Caso d.*/
+            t->right = rrot(t->right);
+        t = lrot(t); /* Caso c.*/
+        flag = 0; /* El subárbol no aumenta su altura */
+    }
+    else if (t->bal == 0)/* La inserción lo balanceo */
+        flag = 0; /* El subárbol no aumenta su altura. Caso a*/
+    else /* Quedó desbalanceado con -1 ó +1 Caso b */
+        flag = 1; /* Propaga ascendentemente la necesidad de rebalancear */
+    return t;
+}
+
+pnodo avl::EspejoAVL(char *placa, char *marca1, char *modelo1, char *ano1, char *color1, int precio1, char *transmision1, pnodo t){
+    placa1 = placa; //pasa argumento a global.
+    marca=marca1;
+    modelo=modelo1;
+    ano=ano1;
+    color=color1;
+    precio=precio1;
+    transmision=transmision1;
+
+    t = espejoR(t);
+
+    if (flag == 1)
+        alto_avl++;
+    //si la propagación llega hasta la raíz, aumenta la altura.
+    return t;
+}
+
 /* Mantiene variable global con el alto del árbol. */
 pnodo avl::InsertarAVL(char* placa, char* marca1, char* modelo1, char* ano1, char* color1, int precio1, char* transmision1, pnodo t)
 {
@@ -179,7 +254,6 @@ pnodo avl::InsertarAVL(char* placa, char* marca1, char* modelo1, char* ano1, cha
     //si la propagación llega hasta la raíz, aumenta la altura.
     return t;
 }
-
 
 pnodo avl::deleteR(pnodo t)
 {
@@ -395,6 +469,45 @@ pnodo avl::_buscar(char* placa, pnodo t){
         }
     }
 }
+
+pnodo avl::Modificar(char *placa, char *marca, char *modelo, char *ano, char *color, int precio, char *transmision, pnodo t){
+    pnodo p;
+    p = _modificar(placa, marca, modelo, ano, color, precio, transmision, t);
+    return p;
+}
+
+pnodo avl::_modificar(char *placa, char *marca, char *modelo, char *ano, char *color, int precio, char *transmision, pnodo t){
+    pnodo actual = t;
+    while(actual!=NULL){
+        if(strcmp(placa, actual->placa)>0){
+            actual = actual->right;
+        }else if(strcmp(placa, actual->placa)<0){
+            actual = actual->left;
+        }else{
+            if(marca!=NULL){
+                actual->marca = marca;
+            }
+            if(modelo!=NULL){
+                actual->modelo = modelo;
+            }
+            if(ano!=NULL){
+                actual->ano = ano;
+            }
+            if(color!=NULL){
+                actual->color = color;
+            }
+            if(precio!=0){
+                actual->precio = precio;
+            }
+            if(transmision!=NULL){
+                actual->transmision = transmision;
+            }
+            return actual;
+            break;
+        }
+    }
+}
+
 /*
 
 
