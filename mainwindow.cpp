@@ -140,26 +140,6 @@ void MainWindow::cargar_archivo(QString contenido){
             }
         }
     }
-    /*
-
-    QString linea="";
-    for(int i=0;i<lineas.length();i++){
-
-        linea = lineas.value(i);
-        if(linea.isNull() || linea.isEmpty()){
-           cout<<"linea vacia"<<endl;
-        }else{
-            QStringList datos = linea.split(":");
-
-            QString dato="";
-            for(int j; j<datos.length(); j++){
-                dato = datos.value(j);
-                cout<<j<<endl;
-                cout<<dato.toStdString()<<endl;
-            }
-        }
-    }
-    **/
 
 }
 
@@ -174,6 +154,13 @@ void MainWindow::on_btnbuscar_clicked()
         strcpy(pla, placa.toLatin1().data());
 
         ubicado = arbol_carros.Buscar(pla, carro);
+
+        cout<<"buscar"<<endl;
+        char* dato_nodo = (char*)malloc(10);
+        strcpy(dato_nodo, ubicado->modelo);
+        QString texto_n = QString::fromStdString(dato_nodo);
+        cout<<"contenido del nodo"<<endl;
+        cout<<texto_n.toStdString()<<endl;
 
         if(ubicado==NULL){
             QMessageBox::information(this,"Error","Dato no encontrado.");
