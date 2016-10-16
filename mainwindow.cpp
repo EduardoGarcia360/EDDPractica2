@@ -8,11 +8,13 @@
 #include "QFileDialog"
 #include "avl.h"
 #include "iostream"
+#include "QPainter"
 
 using namespace std;
 
 avl::pnodo carro;
 avl arbol_carros;
+bool graficar=false;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->cboxtransmision->addItem("Automatica");
     ui->cboxtransmision->addItem("Mecanica");
-
 }
 
 MainWindow::~MainWindow()
@@ -29,8 +30,23 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::paintEvent(QPaintEvent *e){
+    if(graficar){
+        QPixmap pix(591,291);
+        pix.fill(Qt::white);
+        QPainter paint(&pix);
+        paint.drawLine(0,0,15,15);
+        ui->lblgrafica1->setPixmap(pix);
+    }else{
+        QPixmap pix(591,291);
+        pix.fill(Qt::white);
+        ui->lblgrafica1->setPixmap(pix);
+    }
+}
+
 void MainWindow::on_btnagregar_clicked()
 {
+    limpiar();
     QString placa, marca, modelo, ano, color, precio, transmision;
     placa=ui->txtplaca->text();
     marca=ui->txtmarca->text();
@@ -39,6 +55,7 @@ void MainWindow::on_btnagregar_clicked()
     color=ui->txtcolor->text();
     precio=ui->txtprecio->text();
     transmision=ui->cboxtransmision->currentText();
+
     if(placa.isNull()||marca.isNull()||modelo.isNull()||ano.isNull()||color.isNull()||precio.isNull()||transmision.isNull()){
         QMessageBox::information(this,"Error","Debes llenar todas las casillas.");
     }else{
@@ -57,17 +74,14 @@ void MainWindow::on_btnagregar_clicked()
         strcpy(tra, transmision.toLatin1().data());
         int pre = precio.toInt();
         carro = arbol_carros.InsertarAVL(pla,mar,mod,an,col,pre,tra,carro);
-        ui->txtplaca->setText("");
-        ui->txtmarca->setText("");
-        ui->txtmodelo->setText("");
-        ui->txtano->setText("");
-        ui->txtcolor->setText("");
-        ui->txtprecio->setText("");
+        ui->listWidget->addItem("* Se incerto el carro con placa: "+placa);
+        limpiar2();
     }
 }
 
 void MainWindow::on_btncargar_clicked()
 {
+    limpiar();
     QString ruta = QFileDialog::getOpenFileName(this,tr("Elija un Archivo."), "/home/eduardo/", "Txt files (*.txt*)");
     QFile archivo(ruta);
     if(!archivo.open(QFile::ReadOnly | QFile::Text)){
@@ -75,9 +89,9 @@ void MainWindow::on_btncargar_clicked()
     }else{
         QTextStream contenido(&archivo);
         QString texto = contenido.readAll();
-        //cout<<texto.toStdString()<<endl;
         cargar_archivo(texto);
         archivo.close();
+        ui->listWidget->addItem("* Se cargaron datos mediante un archivo.");
     }
 }
 
@@ -92,13 +106,8 @@ void MainWindow::cargar_archivo(QString contenido){
     QStringList lineas = contenido.split("\n"); //se separan las lineas por el salto de linea.
     for(int h=0; h<lineas.length(); h++){
         QString tmp = lineas.value(h);
-        //cout<<h<<endl;
-        //cout<<tmp.toStdString()<<endl;
         QStringList algo = tmp.split(":");
-        //QString tmp3 = algo.value(2);
-        //cout<<tmp3.toStdString()<<endl;
         for(int w=0; w<algo.length(); w++){
-            //cout<<w<<endl;
             QString tmp2 = algo.value(w);
             switch(caso){
             case 0:
@@ -134,7 +143,6 @@ void MainWindow::cargar_archivo(QString contenido){
                 tra = new char[tmp2.size()+1];
                 strcpy(tra, tmp2.toLatin1().data());
                 caso=0;
-                cout<<"insertar"<<endl;
                 carro = arbol_carros.InsertarAVL(pla, mar, mod, an, col, pre, tra, carro);
                 break;
             }
@@ -145,6 +153,7 @@ void MainWindow::cargar_archivo(QString contenido){
 
 void MainWindow::on_btnbuscar_clicked()
 {
+    limpiar();
     QString placa = ui->txtplaca->text();
     if(placa.isNull()||placa.isEmpty()){
         QMessageBox::information(this,"Error","Para buscar debes ingresar una placa.");
@@ -186,7 +195,7 @@ void MainWindow::on_btnbuscar_clicked()
 
             texto_nodo = QString::number(ubicado->precio);
             ui->txtprecio->setPlaceholderText(texto_nodo);
-
+            ui->listWidget->addItem("* Se busco el auto con placa: "+placa);
         }
 
     }
@@ -194,6 +203,7 @@ void MainWindow::on_btnbuscar_clicked()
 
 void MainWindow::on_btneliminar_clicked()
 {
+    limpiar();
     QString placa = ui->txtplaca->text();
     if(placa.isNull()||placa.isEmpty()){
         QMessageBox::information(this,"Error","Para eliminar debes ingresar una placa.");
@@ -202,11 +212,13 @@ void MainWindow::on_btneliminar_clicked()
         char* pla = new char[placa.size()+1];
         strcpy(pla, placa.toLatin1().data());
         ubicado = arbol_carros.DescartarAVL(pla, carro);
+        ui->listWidget->addItem("* Se elimino el auto con placa: "+ placa);
     }
 }
 
 void MainWindow::on_btnmodificar_clicked()
 {
+    limpiar();
     QString placa = ui->txtplaca->text();
     if(placa.isNull()||placa.isEmpty()){
         QMessageBox::information(this,"Error","Para modificar debes ingresar una placa.");
@@ -231,35 +243,35 @@ void MainWindow::on_btnmodificar_clicked()
             char* an;
             char* col;
             char* tra;
-            if(marca.isNull()){
-                mar = new char[0];
-                strcpy(mar, NULL);
+            if(marca.isNull()||marca.isEmpty()){
+                mar = new char[1];
+                strcpy(mar, "n");
             }else{
                 mar = new char[marca.size()+1];
                 strcpy(mar, marca.toLatin1().data());
             }
-            if(modelo.isNull()){
-                mod = new char[0];
-                strcpy(mod, NULL);
+            if(modelo.isNull()||modelo.isEmpty()){
+                mod = new char[1];
+                strcpy(mod, "n");
             }else{
                 mod = new char[modelo.size()+1];
                 strcpy(mod, modelo.toLatin1().data());
             }
-            if(ano.isNull()){
-                an = new char[0];
-                strcpy(an, NULL);
+            if(ano.isNull()||ano.isEmpty()){
+                an = new char[1];
+                strcpy(an, "n");
             }else{
                 an = new char[ano.size()+1];
                 strcpy(an, ano.toLatin1().data());
             }
-            if(color.isNull()){
-                col = new char[0];
-                strcpy(col, NULL);
+            if(color.isNull()||color.isEmpty()){
+                col = new char[1];
+                strcpy(col, "n");
             }else{
                 col = new char[color.size()+1];
                 strcpy(col, color.toLatin1().data());
             }
-            if(precio.isNull()){
+            if(precio.isNull()||precio.isEmpty()){
                 precio1=0;
             }else{
                 precio1 = precio.toInt();
@@ -268,6 +280,30 @@ void MainWindow::on_btnmodificar_clicked()
             strcpy(tra, transmision.toLatin1().data());
 
             carro = arbol_carros.Modificar(pla, mar, mod, an, col, precio1, tra, carro);
+            ui->listWidget->addItem("* Se modifico el auto con placa: "+placa);
+            limpiar2();
         }
     }
+}
+
+void MainWindow::limpiar(){
+    ui->txtmarca->setPlaceholderText("");
+    ui->txtmodelo->setPlaceholderText("");
+    ui->txtprecio->setPlaceholderText("");
+    ui->txtano->setPlaceholderText("");
+    ui->txtcolor->setPlaceholderText("");
+}
+
+void MainWindow::limpiar2(){
+    ui->txtplaca->setText("");
+    ui->txtmarca->setText("");
+    ui->txtmodelo->setText("");
+    ui->txtano->setText("");
+    ui->txtcolor->setText("");
+    ui->txtprecio->setText("");
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    arbol_carros.preorder(carro);
 }

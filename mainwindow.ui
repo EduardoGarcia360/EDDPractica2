@@ -279,14 +279,17 @@
        </rect>
       </property>
      </widget>
-     <widget class="QGraphicsView" name="graphicsView">
+     <widget class="QLabel" name="lblgrafica1">
       <property name="geometry">
        <rect>
         <x>510</x>
-        <y>0</y>
-        <width>601</width>
-        <height>311</height>
+        <y>10</y>
+        <width>591</width>
+        <height>291</height>
        </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
       </property>
      </widget>
     </widget>

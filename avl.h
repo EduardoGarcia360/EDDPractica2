@@ -42,6 +42,7 @@ public:
     void InOrder(pnodo raiz);
     void g(pnodo raiz);
     void inorder(pnodo t, int profundidad);
+    void preorder(pnodo raiz);
 };
 
 #endif // AVL_H

@@ -10,12 +10,13 @@ avl::avl(){}
 # define max(A,B) ((A)>(B)?(A):(B)) /* Definición de macros */
 # define min(A,B) ((A)>(B)?(B):(A))
 int flag; /* Marca para registrar cambios de altura. En rebalance ascendente */
-//flag = 1 indica que debe seguir el ascenso rebalanceando.
-int key; /* Variable global, para disminuir argumentos */
+
 int alto_avl = 0; /* Altura árbol avl. Número de nodos desde la raíz a las hojas.*/
 //avl::Datos *data;
 std::stringstream enzabezado;
 typedef avl::nodo *pnodo;
+
+/* Variable global, para disminuir argumentos */
 int edad;
 char *nombre;
 char *apellido;
@@ -74,7 +75,7 @@ pnodo avl::rrot(pnodo t)
     return t;
 }
 
- void avl::Error(int tipo)
+void avl::Error(int tipo)
 {
     if (tipo) printf("\nError en inserción\n");
     else printf("\nError en descarte\n");
@@ -258,6 +259,7 @@ pnodo avl::InsertarAVL(char* placa, char* marca1, char* modelo1, char* ano1, cha
 pnodo avl::deleteR(pnodo t)
 {
     pnodo p;
+    bool r=false;
     if (t == NULL)  /* No encontró nodo a descartar */
     {
         Error(0);
@@ -278,10 +280,17 @@ pnodo avl::deleteR(pnodo t)
         //o se llega por esta vía si se descartó por la izquierda.
         t->bal += flag; /* se descartó por la izq. Aumenta factor de balance */
     }
-    else   /* (t->clave == key) */
+    else   /* (t->placa == placa1) */
     {
+        cout<<"t.placa igual placa1"<<endl;
         /* Encontró el nodo a descartar */
-        if (t->left == NULL)   /*Si hay hijo derecho debe ser hoja, por ser AVL */
+        if(t->left==0 && t->right==0){
+            cout<<"raiz"<<endl;
+            free(t);
+            flag = 0;
+            r=true;
+            return NULL;
+        }else if (t->left == NULL)   /*Si hay hijo derecho debe ser hoja, por ser AVL */
         {
             p = t;
             t = t->right;
@@ -323,8 +332,12 @@ pnodo avl::deleteR(pnodo t)
     }
 
     /* Mantiene árbol balanceado avl. Sólo una o dos rotaciones por descarte */
-    if (flag == 0 ) /* No hay que rebalancear. Sigue el ascenso, sin rebalancear */
+    if(flag==0 && r==true){
+        return NULL;
+    }else
+    if (flag == 0 ){ /* No hay que rebalancear. Sigue el ascenso, sin rebalancear */
         return t;
+     }
 
     /* Hay que revisar factores de balance en el ascenso*/
     if (t->bal < -1)  /* Si quedó desbalanceado por la izquierda y dejó de ser AVL */
@@ -364,10 +377,11 @@ pnodo avl::deleteR(pnodo t)
 
 pnodo avl::DescartarAVL(char* placa, pnodo t)
 {
+    pnodo p;
     placa1 = placa;
-    t = deleteR(t);
+    p = deleteR(t);
     if (flag == 1) alto_avl--;
-    return t;
+    return p;
 }
 
 pnodo avl::deltreeR(pnodo t)
@@ -398,7 +412,7 @@ void avl::g(pnodo raiz){
    strcpy(pass,tod.c_str());
 
    std::stringstream cuerpo;
-    cuerpo <<"digraph G {node[shape=circle, style=filled, color=green];\n edge[color=blue];rankdir=UD \n ""\n"; //Encabezado (siempre va esto)
+    cuerpo <<"digraph G {node[shape=circle, style=filled];\n edge[color=blue];rankdir=UD \n ""\n"; //Encabezado (siempre va esto)
 
     cuerpo<<pass;
     cuerpo<< "\n}";
@@ -421,7 +435,6 @@ void avl::g(pnodo raiz){
 
 void avl::InOrder(pnodo raiz)
 {
-
     if(raiz)
    {
         InOrder(raiz->left);
@@ -450,6 +463,14 @@ void avl::InOrder(pnodo raiz)
    }
 }
 
+void avl::preorder(pnodo raiz){
+    if(raiz){
+        cout<<raiz->placa<<endl;
+        preorder(raiz->left);
+        preorder(raiz->right);
+    }
+}
+
 pnodo avl::Buscar(char *placa, pnodo t){
     pnodo p;
     p = _buscar(placa, t);
@@ -463,44 +484,52 @@ pnodo avl::_buscar(char* placa, pnodo t){
             actual = actual->right;
         }else if(strcmp(placa, actual->placa)<0){
             actual = actual->left;
-        }else{
+        }else if(strcmp(placa, actual->placa)==0){
             return actual;
             break;
         }
     }
+    if(actual==NULL){
+        return NULL;
+    }
 }
 
-pnodo avl::Modificar(char *placa, char *marca, char *modelo, char *ano, char *color, int precio, char *transmision, pnodo t){
+pnodo avl::Modificar(char *placa1, char *marca1, char *modelo1, char *ano1, char *color1, int precio1, char *transmision1, pnodo t){
     pnodo p;
-    p = _modificar(placa, marca, modelo, ano, color, precio, transmision, t);
+    p = _modificar(placa1, marca1, modelo1, ano1, color1, precio1, transmision1, t);
     return p;
 }
 
-pnodo avl::_modificar(char *placa, char *marca, char *modelo, char *ano, char *color, int precio, char *transmision, pnodo t){
+pnodo avl::_modificar(char *placa1, char *marca1, char *modelo1, char *ano1, char *color1, int precio1, char *transmision1, pnodo t){
     pnodo actual = t;
     while(actual!=NULL){
-        if(strcmp(placa, actual->placa)>0){
+        if(strcmp(placa1, actual->placa)>0){
             actual = actual->right;
-        }else if(strcmp(placa, actual->placa)<0){
+        }else if(strcmp(placa1, actual->placa)<0){
             actual = actual->left;
         }else{
-            if(marca!=NULL){
-                actual->marca = marca;
+            if(strcmp(marca1,"n")!=0){
+                actual->marca = marca1;
             }
-            if(modelo!=NULL){
-                actual->modelo = modelo;
+
+            if(strcmp(modelo1,"n")!=0){
+                actual->modelo = modelo1;
             }
-            if(ano!=NULL){
-                actual->ano = ano;
+
+            if(strcmp(ano1,"n")!=0){
+                actual->ano = ano1;
             }
-            if(color!=NULL){
-                actual->color = color;
+
+            if(strcmp(color1,"n")!=0){
+                actual->color = color1;
             }
-            if(precio!=0){
-                actual->precio = precio;
+
+            if(precio1!=0){
+                actual->precio = precio1;
             }
-            if(transmision!=NULL){
-                actual->transmision = transmision;
+
+            if(strcmp(transmision1,"n")!=0){
+                actual->transmision = transmision1;
             }
             return actual;
             break;
@@ -508,16 +537,4 @@ pnodo avl::_modificar(char *placa, char *marca, char *modelo, char *ano, char *c
     }
 }
 
-/*
 
-
-void avl::inorder(pnodo t, int profundidad)
-{
-    if (t != NULL)
-    {
-        inorder(t->left, profundidad+1);
-        printf ("v= %d p=%d bal=%d \n", t->clave, profundidad, t->bal);
-        inorder(t->right, profundidad+1);
-    }
-}
-**/

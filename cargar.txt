@@ -1,0 +1,11 @@
+323rxv:toyota:corolla:2015:rojo:4587:automatico;
+123xfh:algo:rio:2016:musgo:5478:mecanico;
+111ryt:zuzuki:picanto:2016:azul:5488:mecanico;
+245cad:mitsubishi:xls:2014:verde:58:automatico;
+092cff:mimoto:sport:2013:amarillo:58:mecanico;
+256ptx:papu:maxi:2020:negro:58:automatico;
+756yuf:tucan:despensa:2050:blanco:58:mecanico;
+801nct:sdlg:lancer:1992:gris:58:automatico;
+480sxy:marvel:tucson:2000:morado:58:mecanico;
+560plk:dc:batman:2017:naranja:58:automatico;
+115dgq:avl:dificil:2017:fosforecente:58:mecanico;

@@ -26,6 +26,11 @@ private slots:
     void on_btneliminar_clicked();
 
     void on_btnmodificar_clicked();
+    void limpiar();
+    void limpiar2();
+    void paintEvent(QPaintEvent *e);
+
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
