@@ -13,14 +13,23 @@
 using namespace std;
 
 avl::pnodo carro;
+avl::pnodo carroespejo;
 avl arbol_carros;
+avl arbol_espejo;
+
 bool graficar=false;
+QString algo="";
+int num=0;
+QButtonGroup* gra_arbol = new QButtonGroup;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    gra_arbol->addButton(ui->rbtnarbol);
+    gra_arbol->addButton(ui->rbtnespejo);
+    gra_arbol->addButton(ui->rbtnarreglo);
     ui->cboxtransmision->addItem("Automatica");
     ui->cboxtransmision->addItem("Mecanica");
 }
@@ -32,11 +41,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::paintEvent(QPaintEvent *e){
     if(graficar){
-        QPixmap pix(591,291);
-        pix.fill(Qt::white);
-        QPainter paint(&pix);
-        paint.drawLine(0,0,15,15);
-        ui->lblgrafica1->setPixmap(pix);
+        grafica(algo, num);
     }else{
         QPixmap pix(591,291);
         pix.fill(Qt::white);
@@ -56,7 +61,8 @@ void MainWindow::on_btnagregar_clicked()
     precio=ui->txtprecio->text();
     transmision=ui->cboxtransmision->currentText();
 
-    if(placa.isNull()||marca.isNull()||modelo.isNull()||ano.isNull()||color.isNull()||precio.isNull()||transmision.isNull()){
+    if(placa.isNull()||marca.isNull()||modelo.isNull()||ano.isNull()||color.isNull()||precio.isNull()||transmision.isNull()||
+       placa.isEmpty()||marca.isEmpty()||modelo.isEmpty()||ano.isEmpty()||color.isEmpty()||precio.isEmpty()||transmision.isNull()){
         QMessageBox::information(this,"Error","Debes llenar todas las casillas.");
     }else{
         //insertar en el arbol
@@ -81,8 +87,8 @@ void MainWindow::on_btnagregar_clicked()
 
 void MainWindow::on_btncargar_clicked()
 {
-    limpiar();
-    QString ruta = QFileDialog::getOpenFileName(this,tr("Elija un Archivo."), "/home/eduardo/", "Txt files (*.txt*)");
+    //limpiar();
+    QString ruta = QFileDialog::getOpenFileName(this,"Elija un Archivo.","/home/eduardo/Escritorio/cargar.txt", "Txt files (*.txt*)");
     QFile archivo(ruta);
     if(!archivo.open(QFile::ReadOnly | QFile::Text)){
         QMessageBox::information(this,"Error","No se pudo abrir el archivo.");
@@ -149,6 +155,10 @@ void MainWindow::cargar_archivo(QString contenido){
         }
     }
 
+    algo=arbol_carros.preorder(carro);
+    graficar=true;
+    update();
+    //grafica(algo);
 }
 
 void MainWindow::on_btnbuscar_clicked()
@@ -156,7 +166,9 @@ void MainWindow::on_btnbuscar_clicked()
     limpiar();
     QString placa = ui->txtplaca->text();
     if(placa.isNull()||placa.isEmpty()){
-        QMessageBox::information(this,"Error","Para buscar debes ingresar una placa.");
+        //QMessageBox::information(this,"Error","Para buscar debes ingresar una placa.");
+        int h = arbol_carros.nodos_hoja(carro);
+        cout<<h<<endl;
     }else{
         avl::pnodo ubicado;
         char* pla = new char[placa.size()+1];
@@ -306,4 +318,133 @@ void MainWindow::limpiar2(){
 void MainWindow::on_pushButton_clicked()
 {
     arbol_carros.preorder(carro);
+}
+
+void MainWindow::grafica(QString contenido, int n){
+    QPixmap pix(871,551);
+    pix.fill(Qt::white);
+    QPainter paint(&pix);
+
+    QStringList NodoSeparados = contenido.split("#");
+    int altura_del_arbol=0;
+    if(n==1){
+        altura_del_arbol = arbol_carros.Altura();
+    }else{
+        altura_del_arbol = arbol_espejo.Altura();
+    }
+
+    int altura_del_label = ui->lblgrafica1->height();
+    int ancho_del_label = ui->lblgrafica1->width();
+
+    int nivel1 = altura_del_label/altura_del_arbol;
+    int nivel2 = nivel1*2;
+    int nivel3 = nivel1*3;
+    int nivel4 = nivel1*4;
+
+    for(int i=0;i<NodoSeparados.length()-1;i++){
+        QString linea = NodoSeparados.value(i);
+        QStringList Datos = linea.split(";");
+        if(Datos.length()==3){
+            //Izq;111ryt;3# -> [izq][111ryt][3]
+            if(Datos.value(0) == "Ra"){
+                //cuadro
+                int medio = ancho_del_label / 2;
+                paint.drawRect(medio-35,0,70,50);
+                //linea izq
+                paint.drawLine(medio-35,50,medio-100,70);
+                //linea der
+                paint.drawLine(medio+35,50,medio+100,70);
+                //ui->lblgrafica1->setPixmap(pix);
+                ui->lblgrafica2->setPixmap(pix);
+            }else if(Datos.value(0) == "Izq"){
+                //cuadro
+
+            }else{
+
+            }
+        }else{
+            //Izq;Der;Der;256ptx;3# -> [Izq][Der][Der][256ptx][3]
+        }
+    }
+}
+
+void MainWindow::crear_espejo(){
+    QString todo = arbol_carros.preorder_espejo(carro);
+
+    char* pla;
+    char* mar;
+    char* mod;
+    char* an;
+    char* col;
+    int pre, caso=0;
+    char* tra;
+    QStringList lineas = todo.split("#"); //se separan las lineas por el salto de linea.
+    for(int h=0; h<lineas.length(); h++){
+        QString tmp = lineas.value(h);
+        QStringList algo = tmp.split(";");
+        for(int w=0; w<algo.length(); w++){
+            QString tmp2 = algo.value(w);
+            switch(caso){
+            case 0:
+                pla = new char[tmp2.size()+1];
+                strcpy(pla, tmp2.toLatin1().data());
+                caso=1;
+                break;
+            case 1:
+                mar = new char[tmp2.size()+1];
+                strcpy(mar, tmp2.toLatin1().data());
+                caso=2;
+                break;
+            case 2:
+                mod = new char[tmp2.size()+1];
+                strcpy(mod, tmp2.toLatin1().data());
+                caso=3;
+                break;
+            case 3:
+                an = new char[tmp2.size()+1];
+                strcpy(an, tmp2.toLatin1().data());
+                caso=4;
+                break;
+            case 4:
+                col = new char[tmp2.size()+1];
+                strcpy(col, tmp2.toLatin1().data());
+                caso=5;
+                break;
+            case 5:
+                pre = tmp2.toInt();
+                caso=6;
+                break;
+            case 6:
+                tra = new char[tmp2.size()+1];
+                strcpy(tra, tmp2.toLatin1().data());
+                caso=0;
+                carroespejo = arbol_espejo.EspejoAVL(pla, mar, mod, an, col, pre, tra, carroespejo);
+                break;
+            }
+        }
+    }
+}
+
+void MainWindow::on_btngraficar_clicked()
+{
+    if(ui->rbtnarbol->isChecked()){
+        int a = arbol_carros.Altura();
+        ui->lblaltura->setText(QString::number(a));
+        algo=arbol_carros.preorder(carro);
+        graficar=true;
+        num=1;
+        update();
+    }
+    if(ui->rbtnarreglo->isChecked()){
+
+    }
+    if(ui->rbtnespejo->isChecked()){
+        crear_espejo();
+        int a = arbol_espejo.Altura();
+        ui->lblaltura->setText(QString::number(a));
+        algo=arbol_espejo.preorder(carroespejo);
+        graficar=true;
+        update();
+    }
+
 }

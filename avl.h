@@ -1,7 +1,7 @@
 #ifndef AVL_H
 #define AVL_H
 
-
+#include "QString"
 class avl
 {
 public:
@@ -25,7 +25,7 @@ public:
     static pnodo lrot(pnodo t);
     static pnodo rrot(pnodo t);
     static void Error(int tipo);
-    int Altura(void);
+    int Altura();
     pnodo CreaNodo(char* placa);
     pnodo insertR(pnodo t);
     pnodo InsertarAVL(char* placa, char* marca, char* modelo, char* ano, char* color, int precio, char* transmision, pnodo t);
@@ -42,7 +42,10 @@ public:
     void InOrder(pnodo raiz);
     void g(pnodo raiz);
     void inorder(pnodo t, int profundidad);
-    void preorder(pnodo raiz);
+    QString preorder(pnodo raiz);
+    QString preorder_arreglo(pnodo raiz);
+    QString preorder_espejo(pnodo raiz);
+    int nodos_hoja(pnodo raiz);
 };
 
 #endif // AVL_H

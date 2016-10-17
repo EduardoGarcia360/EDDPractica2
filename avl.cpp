@@ -26,7 +26,9 @@ char* modelo;
 char* ano;
 char* color;
 char* transmision;
-int precio;
+int precio, alt=1, k=1, hoja=0;
+QString pre="", arre="", espe="";
+bool laraiz=true;
 
 /* Rotación Izquierda *
  *  A           B
@@ -81,7 +83,7 @@ void avl::Error(int tipo)
     else printf("\nError en descarte\n");
 }
 
-int Altura(void)
+int avl::Altura(void)
 {
     return alto_avl;
 }
@@ -98,8 +100,8 @@ pnodo avl::CreaNodo(char* placa)
     t->precio=precio;
     t->transmision=transmision;
 
-    t->left=0;
-    t->right=0;
+    t->left=NULL;//puse null en vez de 0
+    t->right=NULL;
     return t;
 }
 
@@ -463,11 +465,84 @@ void avl::InOrder(pnodo raiz)
    }
 }
 
-void avl::preorder(pnodo raiz){
+QString avl::preorder(pnodo raiz){
+    if(laraiz){
+        pre="Ra;";
+        laraiz=false;
+    }
     if(raiz){
-        cout<<raiz->placa<<endl;
+        char* dato_nodo = (char*)malloc(6);
+        strcpy(dato_nodo, raiz->placa);
+        QString texto_n = QString::fromStdString(dato_nodo);
+        pre += texto_n + ";" + QString::number(alt)+"#";
+        alt++;
+        pre+="Izq;";
         preorder(raiz->left);
         preorder(raiz->right);
+        pre+="Der;";
+        alt--;
+        return pre;
+    }
+}
+
+int avl::nodos_hoja(pnodo raiz){
+    if(raiz){
+        nodos_hoja(raiz->left);
+        hoja++;
+        nodos_hoja(raiz->right);
+        return hoja;
+    }
+}
+
+QString avl::preorder_espejo(pnodo raiz){
+    if(raiz){
+        char* dato_nodo = (char*)malloc(6);
+        strcpy(dato_nodo, raiz->placa);
+        QString pla = QString::fromStdString(dato_nodo);
+
+        char* dato_ma = (char*)malloc(10);
+        strcpy(dato_ma, raiz->marca);
+        QString mar = QString::fromStdString(dato_ma);
+
+        char* dato_mod = (char*)malloc(10);
+        strcpy(dato_mod, raiz->modelo);
+        QString mod = QString::fromStdString(dato_mod);
+
+        char* dato_an = (char*)malloc(4);
+        strcpy(dato_an, raiz->ano);
+        QString an = QString::fromStdString(dato_an);
+
+        char* dato_col = (char*)malloc(10);
+        strcpy(dato_col, raiz->color);
+        QString col = QString::fromStdString(dato_col);
+
+        int pre = raiz->precio;
+
+        char* dato_tra = (char*)malloc(10);
+        strcpy(dato_tra, raiz->transmision);
+        QString tra = QString::fromStdString(dato_tra);
+
+        espe+=pla+";"+mar+";"+mod+";"+an+";"+col+";"+QString::number(pre)+";"+tra+"#";
+        preorder_espejo(raiz->left);
+        preorder_espejo(raiz->right);
+        return espe;
+    }
+}
+
+QString avl::preorder_arreglo(pnodo raiz){
+    if(raiz){
+        char* dato_nodo = (char*)malloc(6);
+        strcpy(dato_nodo, raiz->placa);
+        QString t_n = QString::fromStdString(dato_nodo);
+        arre+=QString::number(k)+";"+t_n+"#";
+
+        int tmp = 2*k;
+        k = tmp;
+        preorder_arreglo(raiz->left);
+        preorder_arreglo(raiz->right);
+        int tmp2 = 2*k+1;
+        k = tmp2;
+        return arre;
     }
 }
 

@@ -29,8 +29,10 @@ private slots:
     void limpiar();
     void limpiar2();
     void paintEvent(QPaintEvent *e);
-
+    void grafica(QString contenido, int n);
     void on_pushButton_clicked();
+    void crear_espejo();
+    void on_btngraficar_clicked();
 
 private:
     Ui::MainWindow *ui;
